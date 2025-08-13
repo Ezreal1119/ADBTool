@@ -418,6 +418,17 @@ class ADBTool:
         cmd = f'adb install "{apk_path}"'
         self.run_single_adb_command(cmd, self.format_install, self.install_button)
 
+    def browse_install_apk(self):
+        """Open file dialog to select an APK file for installation."""
+        file_path = filedialog.askopenfilename(
+            initialdir=os.path.expanduser("~/Desktop"),
+            title="Select APK File to Install",
+            filetypes=(("APK files", "*.apk"), ("All files", "*.*"))
+        )
+        if file_path:
+            self.install_apk_entry.delete(0, tk.END)  # Clear before inserting
+            self.install_apk_entry.insert(0, file_path)
+
     def run_search_apk(self):
         apk_name = self.search_apk_entry.get().strip()
         if not apk_name:
@@ -441,6 +452,17 @@ class ADBTool:
             return
         cmd = f'adb sideload "{firmware_path}"'
         self.run_single_adb_command(cmd, self.format_sideload, self.sideload_button)
+
+    def browse_sideload_firmware(self):
+        """Open file dialog to select a firmware file for sideloading."""
+        file_path = filedialog.askopenfilename(
+            initialdir=os.path.expanduser("~/Desktop"),
+            title="Select Firmware File to Sideload",
+            filetypes=(("ZIP files", "*.zip"), ("All files", "*.*"))
+        )
+        if file_path:
+            self.sideload_apk_entry.delete(0, tk.END)  # Clear before inserting
+            self.sideload_apk_entry.insert(0, file_path)
 
     def run_check_storage(self):
         path = self.device_storage_entry.get().strip()
@@ -553,9 +575,12 @@ class ADBTool:
         install_row = ttk.Frame(outer)
         install_row.pack(fill=tk.X, pady=4)
         desktop_default = os.path.join(os.path.expanduser("~"), "Desktop")
-        self.install_apk_entry = ttk.Entry(install_row, width=86)
-        self.install_apk_entry.pack(side=tk.LEFT, padx=(6,4))
+        self.install_apk_entry = ttk.Entry(install_row, width=68)
+        self.install_apk_entry.pack(side=tk.LEFT, padx=(6, 4))
         self.install_apk_entry.insert(0, desktop_default + os.sep)
+        self.install_apk_entry.bind("<Command-v>", self.handle_paste)
+        self.install_apk_entry.bind("<<Paste>>", self.handle_paste)
+        ttk.Button(install_row, text="Browse", width=10, command=self.browse_install_apk).pack(side=tk.LEFT, padx=4)
         self.install_button = ttk.Button(install_row, text="Install APK", width=18, command=self.run_install_apk)
         self.install_button.pack(side=tk.LEFT, padx=6)
 
@@ -573,10 +598,15 @@ class ADBTool:
 
         sideload_row = ttk.Frame(outer)
         sideload_row.pack(fill=tk.X, pady=4)
-        self.sideload_apk_entry = ttk.Entry(sideload_row, width=86)
-        self.sideload_apk_entry.pack(side=tk.LEFT, padx=(6,4))
+        self.sideload_apk_entry = ttk.Entry(sideload_row, width=68)
+        self.sideload_apk_entry.pack(side=tk.LEFT, padx=(6, 4))
         self.sideload_apk_entry.insert(0, desktop_default + os.sep)
-        self.sideload_button = ttk.Button(sideload_row, text="Sideload firmware", width=18, command=self.run_sideload_firmware)
+        self.sideload_apk_entry.bind("<Command-v>", self.handle_paste)
+        self.sideload_apk_entry.bind("<<Paste>>", self.handle_paste)
+        ttk.Button(sideload_row, text="Browse", width=10, command=self.browse_sideload_firmware).pack(side=tk.LEFT,
+                                                                                                      padx=4)
+        self.sideload_button = ttk.Button(sideload_row, text="Sideload firmware", width=18,
+                                          command=self.run_sideload_firmware)
         self.sideload_button.pack(side=tk.LEFT, padx=6)
 
         sys_row = ttk.Frame(outer)
